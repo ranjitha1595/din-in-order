@@ -1,6 +1,7 @@
 package com.example.dio.service.impl;
 
 import com.example.dio.enums.UserRole;
+import com.example.dio.exception.UserNotFoundByIdException;
 import com.example.dio.model.Admin;
 import com.example.dio.model.Staff;
 import com.example.dio.model.User;
@@ -8,6 +9,8 @@ import com.example.dio.repository.UserRepository;
 import com.example.dio.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -19,13 +22,16 @@ public class UserServiceImpl implements UserService {
     public User registerUser(User user) {
         User user2 = this.createUserByRole(user.getRole());
 
-        this.mapToNewUser(user,user2);
-        return userRepository.save(user);
+        this.mapToNewUser(user, user2);
+        return userRepository.save(user2);
     }
 
     private void mapToNewUser(User user, User user2) {
         user2.setUsername(user.getUsername());
         user2.setEmail(user.getEmail());
+        user2.setRole(user.getRole());
+        user2.setPhno(user.getPhno());
+        user2.setPassword(user.getPassword());
     }
 
     private User createUserByRole(UserRole role){
@@ -37,4 +43,11 @@ public class UserServiceImpl implements UserService {
         }
         return user;
     }
+
+    @Override
+    public User findUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundByIdException("Failed to find user, user not found by id"));
+    }
+
 }
